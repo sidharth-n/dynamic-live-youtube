@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const CARTESIA_API_URL = 'https://api.cartesia.ai/tts/bytes';
 const MODEL_ID = 'sonic-english';
-const VOICE_ID = 'a0e99841-438c-4a64-b679-ae501e7d6091'; // Calm, spiritual voice
+const VOICE_ID = 'ecd0a653-6432-4bd1-b209-902a2127dd79'; // Custom Doge Voice
 
 export const generateSpeech = async (text: string, apiKey: string): Promise<ArrayBuffer | null> => {
   try {

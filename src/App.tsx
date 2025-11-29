@@ -27,7 +27,7 @@ function App() {
   const [isActive, setIsActive] = useState(false);
 
   // Hook for logic
-  const { currentRoast, queueSize, isConnected, error, testAudio, isPlaying } = useChatPoller({
+  const { currentRoast, queueSize, isConnected, error, testAudio, isPlaying, isAudioPlaying } = useChatPoller({
     isActive,
     youtubeApiKey: settings.youtubeApiKey,
     cartesiaApiKey: settings.cartesiaApiKey,
@@ -68,7 +68,7 @@ function App() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans">
-      <Background isTalking={isPlaying} mouthConfig={mouthConfig} />
+      <Background isTalking={isAudioPlaying} mouthConfig={mouthConfig} />
       <DivineParticles />
       
       <CommentDisplay roast={currentRoast} />

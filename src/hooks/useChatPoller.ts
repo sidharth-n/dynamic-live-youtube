@@ -185,6 +185,9 @@ export const useChatPoller = ({
       if (isPlaying || queue.length === 0 || !isActive) return;
 
       const nextMessage = queue[0];
+      if (!nextMessage) return;
+
+      // Mark as processing (blocks queue)
       setIsPlaying(true);
       setQueue((prev) => prev.slice(1)); // Remove from queue immediately
       
@@ -211,23 +214,27 @@ export const useChatPoller = ({
           
           // Handle cleanup after audio ends + 2 seconds
           audioRef.current.onended = () => {
+             setIsAudioPlaying(false); // Stop mouth immediately
              setTimeout(() => {
-                 setIsPlaying(false);
+                 setIsPlaying(false); // Unblock queue
                  setCurrentComment(null);
                  setCurrentRoast(null);
-             }, 2000); // Wait 2 seconds before hiding
+             }, 2000); // Wait 2 seconds before hiding text
           };
 
+          setIsAudioPlaying(true); // Start mouth immediately
           await audioRef.current.play();
         } else {
           // If TTS fails, skip to next
           setIsPlaying(false);
+          setIsAudioPlaying(false);
           setCurrentComment(null);
           setCurrentRoast(null);
         }
       } catch (err) {
         console.error('Playback error:', err);
         setIsPlaying(false);
+        setIsAudioPlaying(false);
         setCurrentComment(null);
         setCurrentRoast(null);
       }
@@ -242,14 +249,22 @@ export const useChatPoller = ({
     queueSize: queue.length,
     isConnected,
     error,
-    isPlaying,
+    isPlaying, // Still useful for debug or other logic
+    isAudioPlaying, // NEW: Use this for mouth animation
     testAudio: async () => {
       if (audioRef.current) {
         try {
-          // Short silent MP3 to unlock audio on user interaction
-          audioRef.current.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMD//////////////////////////////////////////////////////////////////wAAAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAAAAAAAAAAAAACCAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAATGF2YzU4LjU0LjEwMAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAATGF2YzU4LjU0LjEwMAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAATGF2YzU4LjU0LjEwMAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAATGF2YzU4LjU0LjEwMAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAATGF2YzU4LjU0LjEwMAAAAAAAAAAA';
-          await audioRef.current.play();
-          // We don't restore originalSrc because we only do this on start when it's likely empty or we don't care.
+          // Create a silent buffer to unlock audio context
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const buffer = audioContext.createBuffer(1, 1, 22050);
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioContext.destination);
+          source.start(0);
+          
+          // Also try playing the element
+          await audioRef.current.play().catch(() => {});
+          audioRef.current.pause();
         } catch (e) {
           console.error("Audio warmup failed", e);
         }
