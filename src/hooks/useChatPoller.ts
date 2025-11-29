@@ -197,10 +197,7 @@ export const useChatPoller = ({
         const roast = await generateRoast(nextMessage.message, veniceApiKey);
         const displayRoast = roast || "Much empty, very silence.";
         
-        // 3. Show Roast
-        setCurrentRoast(displayRoast);
-
-        // 4. Speak: "User says... Roast"
+        // 3. Generate Audio (Pre-fetch)
         const textToSpeak = `${nextMessage.authorName} says... ${displayRoast}`;
         const audioData = await generateSpeech(textToSpeak, cartesiaApiKey);
 
@@ -208,6 +205,9 @@ export const useChatPoller = ({
           const blob = new Blob([audioData], { type: 'audio/mp3' });
           const url = URL.createObjectURL(blob);
           audioRef.current.src = url;
+          
+          // 4. Show Roast AND Play Audio simultaneously
+          setCurrentRoast(displayRoast);
           await audioRef.current.play();
           // onended will handle cleanup
         } else {

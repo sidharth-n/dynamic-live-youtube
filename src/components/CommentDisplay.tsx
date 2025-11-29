@@ -9,6 +9,7 @@ interface CommentDisplayProps {
 export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }) => {
   const [visibleComment, setVisibleComment] = useState<ChatMessage | null>(null);
   const [visibleRoast, setVisibleRoast] = useState<string | null>(null);
+  const [typedRoast, setTypedRoast] = useState<string>("");
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
@@ -18,23 +19,41 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
       
       // Reset roast when new comment appears
       setVisibleRoast(null);
+      setTypedRoast("");
 
-      // Auto-hide after 15 seconds
+      // Auto-hide after 20 seconds (increased for longer reading time)
       const timer = setTimeout(() => {
         setIsExiting(true);
         setTimeout(() => {
             setVisibleComment(null);
             setVisibleRoast(null);
+            setTypedRoast("");
         }, 1000);
-      }, 15000);
+      }, 20000);
 
       return () => clearTimeout(timer);
     }
   }, [comment]);
 
+  // Typewriter Effect
   useEffect(() => {
     if (roast) {
         setVisibleRoast(roast);
+        setTypedRoast("");
+        
+        let i = 0;
+        const speed = 50; // ms per character
+        
+        const typeInterval = setInterval(() => {
+            if (i < roast.length) {
+                setTypedRoast(prev => prev + roast.charAt(i));
+                i++;
+            } else {
+                clearInterval(typeInterval);
+            }
+        }, speed);
+
+        return () => clearInterval(typeInterval);
     }
   }, [roast]);
 
@@ -42,7 +61,7 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
 
   return (
     <div 
-      className={`fixed left-12 top-1/2 -translate-y-1/2 z-30 w-96 transition-all duration-1000 ease-in-out ${
+      className={`fixed left-12 top-1/2 -translate-y-1/2 z-30 w-[600px] transition-all duration-1000 ease-in-out ${
         isExiting ? 'opacity-0 -translate-x-10' : 'opacity-100 translate-x-0'
       }`}
     >
@@ -71,7 +90,7 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
           <div className="flex items-center justify-center mb-6">
             <div className="h-px w-12" style={{ background: 'linear-gradient(90deg, transparent, #F97316)' }}></div>
             <span 
-                className="mx-4 font-comic tracking-[0.2em] text-sm uppercase font-bold"
+                className="mx-4 font-comic tracking-[0.2em] text-lg uppercase font-bold"
                 style={{ color: '#FB923C' }}
             >
                 Doge Roast
@@ -80,19 +99,19 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
           </div>
 
           {/* Content */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-6">
             {/* Original Comment */}
             <div className="mb-4">
                 <p 
-                    className="font-comic text-sm italic"
+                    className="font-comic text-xl md:text-2xl italic"
                     style={{ color: '#FDBA74' }}
                 >
                   "{visibleComment.message}"
                 </p>
-                <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="flex items-center justify-center gap-2 mt-3">
                     <div className="w-1 h-1 rounded-full" style={{ backgroundColor: '#F97316' }}></div>
                     <p 
-                        className="font-comic text-xs uppercase tracking-wider"
+                        className="font-comic text-sm uppercase tracking-wider"
                         style={{ color: '#FDBA74' }}
                     >
                         {visibleComment.authorName}
@@ -101,14 +120,14 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
                 </div>
             </div>
 
-            {/* Roast (if available) */}
+            {/* Roast (Typewriter) */}
             {visibleRoast && (
-                <div className="mt-6 pt-6 border-t border-orange-500/30 animate-fade-in">
+                <div className="mt-6 pt-6 border-t border-orange-500/30">
                     <p 
-                        className="font-comic text-xl md:text-2xl leading-relaxed drop-shadow-md font-bold"
+                        className="font-comic text-3xl md:text-4xl leading-relaxed drop-shadow-md font-bold"
                         style={{ color: '#FEF08A', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
                     >
-                    "{visibleRoast}"
+                    "{typedRoast}"
                     </p>
                 </div>
             )}
