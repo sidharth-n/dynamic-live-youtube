@@ -1,10 +1,10 @@
 import React from 'react';
 
 interface BackgroundProps {
-  imageUrl: string | null;
+  imageUrl?: string | null;
 }
 
-export const Background: React.FC<BackgroundProps> = ({ imageUrl }) => {
+export const Background: React.FC<BackgroundProps> = ({ imageUrl = '/doge_show_background.png' }) => {
   return (
     <div className="fixed inset-0 -z-10 bg-black">
       {imageUrl ? (

@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { getLiveChatId, getChatMessages, getLiveStreamByChannelId } from '../services/youtube';
 import type { ChatMessage } from '../services/youtube';
 import { generateSpeech } from '../services/cartesia';
+import { generateRoast } from '../services/venice';
 
 interface UseChatPollerProps {
   isActive: boolean;
   youtubeApiKey: string;
   cartesiaApiKey: string;
+  veniceApiKey: string;
   videoId: string;
   channelId?: string;
   volume: number;
@@ -16,11 +18,13 @@ export const useChatPoller = ({
   isActive,
   youtubeApiKey,
   cartesiaApiKey,
+  veniceApiKey,
   videoId,
   channelId,
   volume,
 }: UseChatPollerProps) => {
   const [currentComment, setCurrentComment] = useState<ChatMessage | null>(null);
+  const [currentRoast, setCurrentRoast] = useState<string | null>(null);
   const [queue, setQueue] = useState<ChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +43,7 @@ export const useChatPoller = ({
     audioRef.current.onended = () => {
       setIsPlaying(false);
       setCurrentComment(null);
+      setCurrentRoast(null);
     };
     return () => {
       if (audioRef.current) {
@@ -70,6 +75,12 @@ export const useChatPoller = ({
 
       if (!cartesiaApiKey) {
         setError('Cartesia API Key is missing');
+        setIsConnected(false);
+        return;
+      }
+      
+      if (!veniceApiKey) {
+        setError('Venice API Key is missing');
         setIsConnected(false);
         return;
       }
@@ -155,7 +166,7 @@ export const useChatPoller = ({
     }
 
     return () => clearTimeout(timeoutId);
-  }, [isActive, youtubeApiKey, videoId, channelId]);
+  }, [isActive, youtubeApiKey, videoId, channelId, veniceApiKey]);
 
   // Processing Queue
   useEffect(() => {
@@ -164,11 +175,22 @@ export const useChatPoller = ({
 
       const nextMessage = queue[0];
       setIsPlaying(true);
-      setQueue((prev) => prev.slice(1)); // Remove from queue immediately to prevent double processing
+      setQueue((prev) => prev.slice(1)); // Remove from queue immediately
+      
+      // 1. Show original comment immediately
       setCurrentComment(nextMessage);
+      setCurrentRoast(null);
 
       try {
-        const textToSpeak = `I bless you ${nextMessage.message}`;
+        // 2. Generate Roast
+        const roast = await generateRoast(nextMessage.message, veniceApiKey);
+        const displayRoast = roast || "Much empty, very silence.";
+        
+        // 3. Show Roast
+        setCurrentRoast(displayRoast);
+
+        // 4. Speak: "User says... Roast"
+        const textToSpeak = `${nextMessage.authorName} says... ${displayRoast}`;
         const audioData = await generateSpeech(textToSpeak, cartesiaApiKey);
 
         if (audioData && audioRef.current) {
@@ -181,19 +203,22 @@ export const useChatPoller = ({
           // If TTS fails, skip to next
           setIsPlaying(false);
           setCurrentComment(null);
+          setCurrentRoast(null);
         }
       } catch (err) {
         console.error('Playback error:', err);
         setIsPlaying(false);
         setCurrentComment(null);
+        setCurrentRoast(null);
       }
     };
 
     processQueue();
-  }, [queue, isPlaying, isActive, cartesiaApiKey]);
+  }, [queue, isPlaying, isActive, cartesiaApiKey, veniceApiKey]);
 
   return {
     currentComment,
+    currentRoast,
     queueSize: queue.length,
     isConnected,
     error,
