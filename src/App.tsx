@@ -27,7 +27,7 @@ function App() {
   const [isActive, setIsActive] = useState(false);
 
   // Hook for logic
-  const { currentRoast, queueSize, isConnected, error, testAudio } = useChatPoller({
+  const { currentRoast, queueSize, isConnected, error, testAudio, isPlaying } = useChatPoller({
     isActive,
     youtubeApiKey: settings.youtubeApiKey,
     cartesiaApiKey: settings.cartesiaApiKey,
@@ -56,9 +56,20 @@ function App() {
     };
   }, [isActive, bgm]);
 
+  // MOUTH CALIBRATION CONFIG
+  // Adjust these values to position the mouth correctly on the Doge
+  const mouthConfig = {
+    top: '53.5%',      // Vertical position (percentage from top)
+    left: '45.5%',     // Horizontal position (percentage from left)
+    scaleX: 0.8,     // Width multiplier
+    scaleY: 0.5,     // Height multiplier
+    rotation: 5      // Rotation in degrees
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans">
-      <Background />
+      {/* DEBUG MODE: Force isTalking={true} to calibrate mouth position */}
+      <Background isTalking={true || isPlaying} mouthConfig={mouthConfig} />
       <DivineParticles />
       
       <CommentDisplay roast={currentRoast} />

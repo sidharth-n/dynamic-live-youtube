@@ -242,6 +242,7 @@ export const useChatPoller = ({
     queueSize: queue.length,
     isConnected,
     error,
+    isPlaying,
     testAudio: async () => {
       if (audioRef.current) {
         try {
