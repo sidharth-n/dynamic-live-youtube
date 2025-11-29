@@ -68,8 +68,7 @@ function App() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans">
-      {/* DEBUG MODE: Force isTalking={true} to calibrate mouth position */}
-      <Background isTalking={true || isPlaying} mouthConfig={mouthConfig} />
+      <Background isTalking={isPlaying} mouthConfig={mouthConfig} />
       <DivineParticles />
       
       <CommentDisplay roast={currentRoast} />
