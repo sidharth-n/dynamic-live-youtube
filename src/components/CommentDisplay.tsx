@@ -55,12 +55,12 @@ export const CommentDisplay: React.FC<CommentDisplayProps> = ({ comment, roast }
         
         {/* Card Container */}
         <div 
-            className="relative p-8 rounded-2xl overflow-hidden backdrop-blur-xl"
+            className="relative p-8 rounded-2xl overflow-hidden"
             style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                borderColor: 'rgba(249, 115, 22, 0.5)',
-                borderWidth: '1px',
-                boxShadow: '0 0 30px rgba(249, 115, 22, 0.5)'
+                backgroundColor: '#000000', // Solid black for OBS
+                borderColor: '#F97316', // Solid Orange
+                borderWidth: '2px',
+                boxShadow: '0 0 30px rgba(249, 115, 22, 0.8)' // Stronger shadow
             }}
         >
           {/* Decorative Elements */}

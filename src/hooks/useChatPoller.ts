@@ -36,6 +36,7 @@ export const useChatPoller = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processedMessageIdsRef = useRef<Set<string>>(new Set());
   const activeVideoIdRef = useRef<string | null>(videoId || null);
+  const startTimeRef = useRef<number>(0);
 
   // Initialize Audio
   useEffect(() => {
@@ -131,12 +132,17 @@ export const useChatPoller = ({
             );
 
             nextPageTokenRef.current = nextPageToken;
-            pollingIntervalRef.current = Math.max(pollingIntervalMillis, 3000); // Min 3s
+            // Optimize polling: Use API suggestion but cap at 1s minimum, 5s maximum
+            pollingIntervalRef.current = Math.min(Math.max(pollingIntervalMillis, 1000), 5000);
 
-            // Filter duplicates and add to queue
-            const newMessages = messages.filter(
-            (msg) => !processedMessageIdsRef.current.has(msg.id)
-            );
+            // Filter duplicates AND old messages
+            const newMessages = messages.filter((msg) => {
+                const isNew = !processedMessageIdsRef.current.has(msg.id);
+                // Check if message was published after start time
+                const msgTime = new Date(msg.publishedAt).getTime();
+                const isAfterStart = msgTime > startTimeRef.current;
+                return isNew && isAfterStart;
+            });
 
             newMessages.forEach((msg) => processedMessageIdsRef.current.add(msg.id));
 
@@ -157,12 +163,17 @@ export const useChatPoller = ({
     };
 
     if (isActive) {
+      // Set start time when becoming active
+      if (startTimeRef.current === 0) {
+          startTimeRef.current = Date.now();
+      }
       poll();
     } else {
       setIsConnected(false);
       liveChatIdRef.current = null;
       nextPageTokenRef.current = undefined;
       activeVideoIdRef.current = videoId || null;
+      startTimeRef.current = 0; // Reset start time
     }
 
     return () => clearTimeout(timeoutId);

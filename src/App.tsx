@@ -22,6 +22,8 @@ function App() {
     volume: 80,
   });
 
+  console.log('DEBUG SETTINGS:', settings); // Debugging API Key
+
   const [isActive, setIsActive] = useState(false);
 
   // Hook for logic
