@@ -27,7 +27,7 @@ function App() {
   const [isActive, setIsActive] = useState(false);
 
   // Hook for logic
-  const { currentComment, currentRoast, queueSize, isConnected, error, testAudio } = useChatPoller({
+  const { currentRoast, queueSize, isConnected, error, testAudio } = useChatPoller({
     isActive,
     youtubeApiKey: settings.youtubeApiKey,
     cartesiaApiKey: settings.cartesiaApiKey,
@@ -61,7 +61,7 @@ function App() {
       <Background />
       <DivineParticles />
       
-      <CommentDisplay comment={currentComment} roast={currentRoast} />
+      <CommentDisplay roast={currentRoast} />
 
       <ControlPanel
         isActive={isActive}

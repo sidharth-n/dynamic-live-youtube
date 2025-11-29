@@ -188,17 +188,17 @@ export const useChatPoller = ({
       setIsPlaying(true);
       setQueue((prev) => prev.slice(1)); // Remove from queue immediately
       
-      // 1. Show original comment immediately
-      setCurrentComment(nextMessage);
+      // 1. Show original comment immediately - REMOVED as per request
+      // setCurrentComment(nextMessage);
       setCurrentRoast(null);
 
       try {
         // 2. Generate Roast
-        const roast = await generateRoast(nextMessage.message, veniceApiKey);
+        const roast = await generateRoast(nextMessage.message, nextMessage.authorName, veniceApiKey);
         const displayRoast = roast || "Much empty, very silence.";
         
         // 3. Generate Audio (Pre-fetch)
-        const textToSpeak = `${nextMessage.authorName} says... ${displayRoast}`;
+        const textToSpeak = `${displayRoast}`; // Only speak the roast, username is handled by AI
         const audioData = await generateSpeech(textToSpeak, cartesiaApiKey);
 
         if (audioData && audioRef.current) {
@@ -208,8 +208,17 @@ export const useChatPoller = ({
           
           // 4. Show Roast AND Play Audio simultaneously
           setCurrentRoast(displayRoast);
+          
+          // Handle cleanup after audio ends + 2 seconds
+          audioRef.current.onended = () => {
+             setTimeout(() => {
+                 setIsPlaying(false);
+                 setCurrentComment(null);
+                 setCurrentRoast(null);
+             }, 2000); // Wait 2 seconds before hiding
+          };
+
           await audioRef.current.play();
-          // onended will handle cleanup
         } else {
           // If TTS fails, skip to next
           setIsPlaying(false);
