@@ -63,10 +63,11 @@ export const StatsPanel: React.FC<StatsPanelProps> = ({ roastCount, queueItems, 
             Victims Roasted:
           </span>
           <span 
-            className="font-black leading-none text-yellow-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+            className="font-black leading-none text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
             style={{ 
               fontSize: '5rem', 
               fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+              textShadow: '0 2px 4px rgba(0,0,0,0.8)'
             }}
           >
             {roastCount}
