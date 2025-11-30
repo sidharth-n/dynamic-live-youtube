@@ -38,6 +38,7 @@ export const useChatPoller = ({
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false); // Mouth animation
+  const [roastCount, setRoastCount] = useState(0); // Total roasts delivered
 
   // Queue State
   const [queue, setQueue] = useState<ChatMessage[]>([]); // Raw comments
@@ -243,6 +244,7 @@ export const useChatPoller = ({
         audioElement.src = item.audioUrl;
         setCurrentRoast(item.roast);
         setIsAudioPlaying(true); // Start mouth
+        setRoastCount(prev => prev + 1); // Increment counter
 
         // Cleanup Helper
         let hasCleanedUp = false;
@@ -299,6 +301,8 @@ export const useChatPoller = ({
   return {
     currentRoast,
     queueSize: queue.length + preparedQueue.length,
+    queueItems: [...preparedQueue.map(i => i.authorName), ...queue.map(i => i.authorName)], // Export names for UI
+    roastCount,
     isConnected,
     error,
     isPlaying,

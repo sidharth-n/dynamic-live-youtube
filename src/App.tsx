@@ -3,6 +3,7 @@ import { Background } from './components/Background';
 import { CommentDisplay } from './components/CommentDisplay';
 import { ControlPanel } from './components/ControlPanel';
 import { DivineParticles } from './components/DivineParticles';
+import { StatsPanel } from './components/StatsPanel';
 import { useChatPoller } from './hooks/useChatPoller';
 
 const extractVideoId = (url: string) => {
@@ -28,7 +29,7 @@ function App() {
   const audioRef = useRef<HTMLAudioElement>(null); // Ref for the audio element
 
   // Hook for logic
-  const { currentRoast, queueSize, isConnected, error, testAudio, isPlaying, isAudioPlaying } = useChatPoller({
+  const { currentRoast, queueSize, queueItems, roastCount, isConnected, error, testAudio, isPlaying, isAudioPlaying } = useChatPoller({
     isActive,
     youtubeApiKey: settings.youtubeApiKey,
     cartesiaApiKey: settings.cartesiaApiKey,
@@ -85,6 +86,12 @@ function App() {
       <DivineParticles />
       
       <CommentDisplay roast={currentRoast} />
+      
+      <StatsPanel 
+        isActive={isActive}
+        roastCount={roastCount}
+        queueItems={queueItems}
+      />
 
       <ControlPanel
         isActive={isActive}
