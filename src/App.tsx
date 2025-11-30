@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Background } from './components/Background';
 import { CommentDisplay } from './components/CommentDisplay';
 import { ControlPanel } from './components/ControlPanel';
@@ -22,9 +22,10 @@ function App() {
     volume: 80,
   });
 
-  console.log('DEBUG SETTINGS:', settings); // Debugging API Key
+ // Debugging API Key
 
   const [isActive, setIsActive] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null); // Ref for the audio element
 
   // Hook for logic
   const { currentRoast, queueSize, isConnected, error, testAudio, isPlaying, isAudioPlaying } = useChatPoller({
@@ -35,7 +36,16 @@ function App() {
     videoId: extractVideoId(settings.videoUrl),
     channelId: settings.channelId,
     volume: settings.volume,
+    audioElement: audioRef.current, // Pass the ref's current value (might be null initially, but hook handles it)
   });
+
+  // Force re-render to pass the ref once it's attached
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    if (audioRef.current) {
+        forceUpdate({});
+    }
+  }, []);
 
   // Background Music Logic
   const [bgm] = useState(() => {
@@ -68,6 +78,9 @@ function App() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans">
+      {/* Hidden Audio Element for TTS */}
+      <audio ref={audioRef} className="hidden" />
+      
       <Background isTalking={isAudioPlaying} mouthConfig={mouthConfig} />
       <DivineParticles />
       

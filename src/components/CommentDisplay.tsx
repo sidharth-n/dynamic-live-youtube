@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import type { ChatMessage } from '../services/youtube';
 
 interface CommentDisplayProps {
-  comment: ChatMessage | null;
   roast: string | null;
 }
 

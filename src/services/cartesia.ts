@@ -18,7 +18,7 @@ export const generateSpeech = async (text: string, apiKey: string): Promise<Arra
         language: 'en',
         generation_config: {
             speed: 0.8,
-            emotion: ["sarcastic"],
+            emotion: "sarcastic",
         },
         output_format: {
           container: 'mp3',
